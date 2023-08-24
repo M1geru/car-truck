@@ -227,6 +227,12 @@ function Camerapersp(){
 
 
 var t=0;
+
+var start=function(){
+            Camerapersp();
+}
+
+
 var animate = function () {
 
 
@@ -240,7 +246,7 @@ var animate = function () {
     
     // Renderizar escena con cámaras activas
     
-    console.log(Cambioscena);
+    
 
     document.addEventListener('keydown', (event) => {
         if (event.key === "f"||event.key === "F") {
@@ -289,5 +295,5 @@ var animate = function () {
         Persp.position.x=1500;
     }
 };
-
+start();
 animate();
