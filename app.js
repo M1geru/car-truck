@@ -1,21 +1,72 @@
 var scene = new THREE.Scene();
 
-scene.background=new THREE.Color(0xdddddd);
+scene.background=new THREE.Color(0xd1ddd1);
 //CAMARA
-const camera = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, 1, 5000);
+const camera5 = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, 1, 5000);
+
+
+let activeCameras = [];
+
+ const camera1 = new THREE.PerspectiveCamera(75, window.innerWidth  / window.innerHeight, 1, 5000);
+camera1.position.set(0,150,1800);
+camera1.lookAt(0,0,0);
+ // Configura posición de la cámara 1
+    
+ const camera2 = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 5000);
+camera2.position.set(1500,150,0);
+camera2.lookAt(0,0,0);   
+// Configura posición de la cámara 2
+    
+const camera3 = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 5000);
+    
+camera3.position.set(-1500,150,0);
+camera3.lookAt(0,0,0);
+// Configura posición de la cámara 3
+    
+const camera4 = new THREE.PerspectiveCamera(75, window.innerWidth / 2 / window.innerHeight, 1, 5000);
+camera4.position.set(0,1500,0);
+camera4.lookAt(0,0,0);    
+
+
+// Configura posición de la cámara 4
 
 
 //RENDER
-const renderer = new THREE.WebGLRenderer({anttialias:true});
+const renderer = new THREE.WebGLRenderer();
 renderer.setSize(  window.innerWidth,window.innerHeight  );
-//renderer.shadowMap.enabled=true;
+renderer.shadowMap.enabled=true;
 document.body.appendChild(renderer.domElement);
 
+
 //CONTROLES ORBIT/DEVICE/STEREO
-const orbit = new THREE.OrbitControls(camera, renderer.domElement);
+const orbit = new THREE.OrbitControls(camera5, renderer.domElement);
+orbit.enabled = false;
 //const device = new THREE.DeviceOrientationControls( camera );
 	
+function onWindowResize() {
+    width = window.innerWidth;
+    height = window.innerHeight;
 
+    if (Cambioscena) {
+        const cameraAspect = (width / 2) / height;
+
+        camera1.aspect = cameraAspect;
+        camera2.aspect = cameraAspect;
+        camera3.aspect = cameraAspect;
+        camera4.aspect = cameraAspect;
+        updateViewports();
+    } else {
+        camera5.aspect = width / height;
+        camera5.updateProjectionMatrix();
+        updateViewports();
+    }
+
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+}
+
+// Escuchar evento de cambio de tamaño de ventana
+window.addEventListener('resize', onWindowResize);
 
 //MIXER
 //	var mixer;
@@ -89,10 +140,10 @@ const loader1 = new THREE.FBXLoader();
 
 
 
-camera.rotation.y=45/180*Math.PI;
-camera.position.x=800;
-camera.position.y=100;
-camera.position.z=1000;
+camera5.rotation.y=45/180*Math.PI;
+camera5.position.x=800;
+camera5.position.y=100;
+camera5.position.z=1000;
 
 
 //objects
@@ -108,60 +159,133 @@ scene.add(cube);
 
 cube.position.y=-30
 
+let Cambioscena = false;
+
+
+function Cambioventana() {
+    Cambioscena = !Cambioscena;
+    orbit.enabled = !orbit.enabled;
+
+    const viewWidth = window.innerWidth / 2;
+    const viewHeight = window.innerHeight / 2;
+    renderer.clear();
+
+    if (Cambioscena) {
+        
+        // Parte superior izquierda
+        renderer.setViewport(0, viewHeight, viewWidth, viewHeight);
+        renderer.setScissor(0, viewHeight, viewWidth, viewHeight);
+        renderer.setScissorTest(true);
+        renderer.render(scene, camera1);
+
+        // Parte superior derecha
+        renderer.setViewport(viewWidth, viewHeight, viewWidth, viewHeight);
+        renderer.setScissor(viewWidth, viewHeight, viewWidth, viewHeight);
+        renderer.setScissorTest(true);
+        renderer.render(scene, camera2);
+
+        // Parte inferior izquierda
+        renderer.setViewport(0, 0, viewWidth, viewHeight);
+        renderer.setScissor(0, 0, viewWidth, viewHeight);
+        renderer.setScissorTest(true);
+        renderer.render(scene, camera3);
+
+        // Parte inferior derecha
+        renderer.setViewport(viewWidth, 0, viewWidth, viewHeight);
+        renderer.setScissor(viewWidth, 0, viewWidth, viewHeight);
+        renderer.setScissorTest(true);
+        renderer.render(scene, camera4);
+        updateViewports();
+    } else {
+        
+        renderer.setViewport(0, 0, window.innerWidth, window.innerHeight);
+        renderer.setScissor(0, 0, window.innerWidth, window.innerHeight);
+        renderer.setScissorTest(true);
+        orbit.update();
+        renderer.render(scene, camera5);
+        updateViewports();
+    }
+
+    updateViewports();
+}
+
+// Función para actualizar los viewports
+function updateViewports() {
+    const cameraCount = activeCameras.length;
+    const viewportWidth = 1.0 / cameraCount;
+
+    for (let i = 0; i < cameraCount; i++) {
+        const camera = activeCameras[i];
+        const x = i * viewportWidth;
+
+        renderer.setViewport(x * window.innerWidth, 0, viewportWidth * window.innerWidth, window.innerHeight);
+        renderer.render(scene, camera);
+    }
+}
+
+
+
+
+
 var t=0;
 var animate = function () {
-    renderer.render( scene, camera );
-    requestAnimationFrame( animate );
+
+
+    renderer.clear();
+    if (!Cambioscena) {
+        orbit.update();
+        updateViewports();
+       
+    }
+    
+    // Renderizar escena con cámaras activas
+    
+    
 
     document.addEventListener('keydown', (event) => {
         if (event.key === "f"||event.key === "F") {
-            camera.lookAt(0,0,0);
-            camera.position.x=800;
-            camera.position.y=100;
-            camera.position.z=1000;
+            camera5.lookAt(0,0,0);
+            camera5.position.x=800;
+            camera5.position.y=100;
+            camera5.position.z=1000;
         }
         if(event.key === "1"){
-            camera.position.set(0,150,1800);
-            camera.lookAt(0,0,0);
-           
-        }
-        if(event.key === "2"){
-            camera.position.set(1500,150,0);
-            camera.lookAt(0,0,0);
+
+            renderer.clear();
+            Cambioventana();
             
-        }
-        if(event.key === "3"){
-            camera.position.set(-1500,150,0);
-            camera.lookAt(0,0,0);
-            
-        }
-        if(event.key === "4"){
-            camera.position.set(0,1500,0);
-            camera.lookAt(0,0,0);
            
+        }else if (event.key === 'a' || event.key === 'A') {
+            Cambioscena = false;
+            orbit.enabled = !orbit.enabled;
+            activeCameras = [camera5];
+            updateViewports();
         }
+        
     },false);
 
 
+    requestAnimationFrame( animate );
+    
 
  
-    if(camera.position.y<=-14 ){
-        camera.position.y=-14
+    if(camera5.position.y<=-14 ){
+        camera5.position.y=-14
     }
-    if(camera.position.y>1500){
-        camera.position.y=1500;
+    if(camera5.position.y>1500){
+        camera5.position.y=1500;
     }
-    if(camera.position.z>2300){
-        camera.position.z=2300;
+    if(camera5.position.z>2300){
+        camera5.position.z=2300;
     }
-    if(camera.position.z<-1800){
-        camera.position.z=-1800;
+    if(camera5.position.z<-1800){
+        camera5.position.z=-1800;
     }
-    if(camera.position.x<-1500){
-        camera.position.x=-1500;
+    if(camera5.position.x<-1500){
+        camera5.position.x=-1500;
     }
-    if(camera.position.x>1500){
-        camera.position.x=1500;
+    if(camera5.position.x>1500){
+        camera5.position.x=1500;
     }
 };
 
