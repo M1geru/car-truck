@@ -2,7 +2,7 @@ var scene = new THREE.Scene();
 
 scene.background=new THREE.Color(0xd1ddd1);
 //CAMARA
-const camera5 = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, 1, 5000);
+const Persp = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, 1, 5000);
 
 
 let activeCameras = [];
@@ -39,8 +39,8 @@ document.body.appendChild(renderer.domElement);
 
 
 //CONTROLES ORBIT/DEVICE/STEREO
-const orbit = new THREE.OrbitControls(camera5, renderer.domElement);
-orbit.enabled = false;
+const orbit = new THREE.OrbitControls(Persp, renderer.domElement);
+orbit.enabled = true;
 //const device = new THREE.DeviceOrientationControls( camera );
 	
 function onWindowResize() {
@@ -54,10 +54,10 @@ function onWindowResize() {
         camera2.aspect = cameraAspect;
         camera3.aspect = cameraAspect;
         camera4.aspect = cameraAspect;
-        updateViewports();
+        //updateViewports();
     } else {
-        camera5.aspect = width / height;
-        camera5.updateProjectionMatrix();
+        Persp.aspect = width / height;
+        Persp.updateProjectionMatrix();
         updateViewports();
     }
 
@@ -140,10 +140,10 @@ const loader1 = new THREE.FBXLoader();
 
 
 
-camera5.rotation.y=45/180*Math.PI;
-camera5.position.x=800;
-camera5.position.y=100;
-camera5.position.z=1000;
+Persp.rotation.y=45/180*Math.PI;
+Persp.position.x=800;
+Persp.position.y=100;
+Persp.position.z=1000;
 
 
 //objects
@@ -163,14 +163,14 @@ let Cambioscena = false;
 
 
 function Cambioventana() {
-    Cambioscena = !Cambioscena;
-    orbit.enabled = !orbit.enabled;
+    Cambioscena = true;
+    orbit.enabled=false;
 
     const viewWidth = window.innerWidth / 2;
     const viewHeight = window.innerHeight / 2;
     renderer.clear();
 
-    if (Cambioscena) {
+   
         
         // Parte superior izquierda
         renderer.setViewport(0, viewHeight, viewWidth, viewHeight);
@@ -195,18 +195,8 @@ function Cambioventana() {
         renderer.setScissor(viewWidth, 0, viewWidth, viewHeight);
         renderer.setScissorTest(true);
         renderer.render(scene, camera4);
-        updateViewports();
-    } else {
-        
-        renderer.setViewport(0, 0, window.innerWidth, window.innerHeight);
-        renderer.setScissor(0, 0, window.innerWidth, window.innerHeight);
-        renderer.setScissorTest(true);
-        orbit.update();
-        renderer.render(scene, camera5);
-        updateViewports();
-    }
-
-    updateViewports();
+      
+    
 }
 
 // Función para actualizar los viewports
@@ -222,7 +212,16 @@ function updateViewports() {
         renderer.render(scene, camera);
     }
 }
-
+function Camerapersp(){
+    Cambioscena = false;
+    orbit.enabled = true;
+    renderer.setViewport(0, 0, window.innerWidth, window.innerHeight);
+    renderer.setScissor(0, 0, window.innerWidth, window.innerHeight);
+    renderer.setScissorTest(true);
+    orbit.update();
+    renderer.render(scene, Persp);
+    activeCameras = [Persp];
+}
 
 
 
@@ -231,8 +230,9 @@ var t=0;
 var animate = function () {
 
 
-    renderer.clear();
-    if (!Cambioscena) {
+   
+    if (Cambioscena==false) {
+        renderer.clear();
         orbit.update();
         updateViewports();
        
@@ -240,26 +240,27 @@ var animate = function () {
     
     // Renderizar escena con cámaras activas
     
-    
+    console.log(Cambioscena);
 
     document.addEventListener('keydown', (event) => {
         if (event.key === "f"||event.key === "F") {
-            camera5.lookAt(0,0,0);
-            camera5.position.x=800;
-            camera5.position.y=100;
-            camera5.position.z=1000;
+            Persp.lookAt(0,0,0);
+            Persp.position.x=800;
+            Persp.position.y=100;
+            Persp.position.z=1000;
         }
-        if(event.key === "1"){
+        if(event.key === "s"||event.key === 'A'){
 
             renderer.clear();
             Cambioventana();
             
            
-        }else if (event.key === 'a' || event.key === 'A') {
-            Cambioscena = false;
-            orbit.enabled = !orbit.enabled;
-            activeCameras = [camera5];
-            updateViewports();
+        }
+        if (event.key === 'a' || event.key === 'A') {
+            renderer.clear();
+           
+            Camerapersp();
+         
         }
         
     },false);
@@ -269,23 +270,23 @@ var animate = function () {
     
 
  
-    if(camera5.position.y<=-14 ){
-        camera5.position.y=-14
+    if(Persp.position.y<=-14 ){
+        Persp.position.y=-14
     }
-    if(camera5.position.y>1500){
-        camera5.position.y=1500;
+    if(Persp.position.y>1500){
+        Persp.position.y=1500;
     }
-    if(camera5.position.z>2300){
-        camera5.position.z=2300;
+    if(Persp.position.z>2300){
+        Persp.position.z=2300;
     }
-    if(camera5.position.z<-1800){
-        camera5.position.z=-1800;
+    if(Persp.position.z<-1800){
+        Persp.position.z=-1800;
     }
-    if(camera5.position.x<-1500){
-        camera5.position.x=-1500;
+    if(Persp.position.x<-1500){
+        Persp.position.x=-1500;
     }
-    if(camera5.position.x>1500){
-        camera5.position.x=1500;
+    if(Persp.position.x>1500){
+        Persp.position.x=1500;
     }
 };
 
